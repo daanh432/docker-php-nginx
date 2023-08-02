@@ -27,7 +27,7 @@ RUN apk add --no-cache \
   supervisor
 
 # Configure nginx - http
-COPY config/nginx.conf /etc/nginx/nginx.conf.template
+COPY config/nginx.conf /etc/nginx/nginx.conf
 
 # Configure nginx - default server
 COPY config/conf.d /etc/nginx/conf.d/
