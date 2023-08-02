@@ -3,6 +3,7 @@ ARG ALPINE_VERSION=3.18
 FROM alpine:${ALPINE_VERSION}
 # Setup document root
 WORKDIR /var/www/html
+USER root
 
 # Install packages and remove default server definition
 RUN apk add --no-cache \
@@ -51,9 +52,6 @@ EXPOSE 8080
 # Entry point script to replace the WEB_ROOT at runtime
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-# Switch to use a non-root user from here on
-USER nobody
 
 # Handle pre start scripts
 ENTRYPOINT ["/entrypoint.sh"]
