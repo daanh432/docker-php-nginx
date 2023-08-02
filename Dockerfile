@@ -39,14 +39,11 @@ COPY config/php.ini /etc/php81/conf.d/custom.ini
 # Configure supervisord
 COPY config/supervisord.conf /etc/supervisor/supervisord.conf
 
-# Make sure files/folders needed by the processes are accessible when they run under the nobody user
-RUN chown -R nobody.nobody /var/www/html /run /var/lib/nginx /var/log/nginx
-
-# Switch to use a non-root user from here on
-USER nobody
-
 # Add application
 COPY --chown=nobody src/ /var/www/html/
+
+# Make sure files/folders needed by the processes are accessible when they run under the nobody user
+RUN chown -R nobody.nobody /var/www/html /run /var/lib/nginx /var/log/nginx
 
 # Expose the port nginx is reachable on
 EXPOSE 8080
@@ -54,6 +51,11 @@ EXPOSE 8080
 # Entry point script to replace the WEB_ROOT at runtime
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# Switch to use a non-root user from here on
+USER nobody
+
+# Handle pre start scripts
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Let supervisord start nginx & php-fpm
