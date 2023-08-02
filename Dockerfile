@@ -1,5 +1,5 @@
 ARG ALPINE_VERSION=3.18
-ARG WEB_ROOT=/var/www/html
+
 FROM alpine:${ALPINE_VERSION}
 # Setup document root
 WORKDIR /var/www/html
@@ -27,11 +27,10 @@ RUN apk add --no-cache \
   supervisor
 
 # Configure nginx - http
-COPY config/nginx.conf /etc/nginx/nginx.conf
+COPY config/nginx.conf /etc/nginx/nginx.conf.template
+
 # Configure nginx - default server
 COPY config/conf.d /etc/nginx/conf.d/
-# Replace the root path in the nginx config with the provided WEB_ROOT
-RUN sed -i "s|root /var/www/html|root ${WEB_ROOT}|" /etc/nginx/conf.d/default.conf
 
 # Configure PHP-FPM
 COPY config/fpm-pool.conf /etc/php81/php-fpm.d/www.conf
@@ -40,7 +39,7 @@ COPY config/php.ini /etc/php81/conf.d/custom.ini
 # Configure supervisord
 COPY config/supervisord.conf /etc/supervisor/supervisord.conf
 
-# Make sure files/folders needed by the processes are accessable when they run under the nobody user
+# Make sure files/folders needed by the processes are accessible when they run under the nobody user
 RUN chown -R nobody.nobody /var/www/html /run /var/lib/nginx /var/log/nginx
 
 # Switch to use a non-root user from here on
@@ -52,8 +51,13 @@ COPY --chown=nobody src/ /var/www/html/
 # Expose the port nginx is reachable on
 EXPOSE 8080
 
+# Entry point script to replace the WEB_ROOT at runtime
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
 # Let supervisord start nginx & php-fpm
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
-# Configure a healthcheck to validate that everything is up&running
+# Configure a healthcheck to validate that everything is up & running
 HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-ping
