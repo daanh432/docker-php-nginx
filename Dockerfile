@@ -1,4 +1,5 @@
 ARG ALPINE_VERSION=3.18
+ARG WEB_ROOT=/var/www/html
 FROM alpine:${ALPINE_VERSION}
 # Setup document root
 WORKDIR /var/www/html
@@ -22,12 +23,15 @@ RUN apk add --no-cache \
   php81-session \
   php81-xml \
   php81-xmlreader \
+  php81-tokenizer \
   supervisor
 
 # Configure nginx - http
 COPY config/nginx.conf /etc/nginx/nginx.conf
 # Configure nginx - default server
 COPY config/conf.d /etc/nginx/conf.d/
+# Replace the root path in the nginx config with the provided WEB_ROOT
+RUN sed -i "s|root /var/www/html|root ${WEB_ROOT}|" /etc/nginx/conf.d/default.conf
 
 # Configure PHP-FPM
 COPY config/fpm-pool.conf /etc/php81/php-fpm.d/www.conf
