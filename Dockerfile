@@ -3,7 +3,6 @@ ARG ALPINE_VERSION=3.18
 FROM alpine:${ALPINE_VERSION}
 # Setup document root
 WORKDIR /var/www/html
-USER root
 
 # Install packages and remove default server definition
 RUN apk add --no-cache \
@@ -44,14 +43,17 @@ COPY config/supervisord.conf /etc/supervisor/supervisord.conf
 COPY --chown=nobody src/ /var/www/html/
 
 # Make sure files/folders needed by the processes are accessible when they run under the nobody user
-RUN chown -R nobody.nobody /var/www/html /run /var/lib/nginx /var/log/nginx /proc/self/fd/1 /proc/self/fd/2 /dev/stdout /dev/stderr
+RUN chown -R nobody.nobody /var/www/html /run /var/lib/nginx /var/log/nginx /etc/nginx/conf.d
 
 # Expose the port nginx is reachable on
 EXPOSE 8080
 
 # Entry point script to replace the WEB_ROOT at runtime
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh && addgroup nobody tty
+RUN chmod +x /entrypoint.sh
+
+# Run as user nobody from here
+USER nobody
 
 # Handle pre start scripts
 ENTRYPOINT ["/entrypoint.sh"]
