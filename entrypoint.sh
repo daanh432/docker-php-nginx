@@ -9,5 +9,5 @@ else
   echo "WEB_ROOT environment variable not set. Using the default WEB_ROOT value: /var/www/html"
 fi
 
-# Start supervisord
-/usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+# Start CMD
+exec "$@"
