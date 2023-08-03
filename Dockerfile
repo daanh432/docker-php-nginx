@@ -44,7 +44,7 @@ COPY config/supervisord.conf /etc/supervisor/supervisord.conf
 COPY --chown=nobody src/ /var/www/html/
 
 # Make sure files/folders needed by the processes are accessible when they run under the nobody user
-RUN chown -R nobody.nobody /var/www/html /run /var/lib/nginx /var/log/nginx /proc/self/fd/{1,2}
+RUN chown -R nobody.nobody /var/www/html /run /var/lib/nginx /var/log/nginx /proc/self/fd/1 /proc/self/fd/2
 
 # Expose the port nginx is reachable on
 EXPOSE 8080
